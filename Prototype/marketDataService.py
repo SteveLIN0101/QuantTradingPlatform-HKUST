@@ -73,8 +73,6 @@ class MarketDataService:
 
         # List to hold all DataFrames
         all_data = []
-
-        i = 0
         
         # Iterate through all files
         for file in files:
@@ -94,12 +92,6 @@ class MarketDataService:
             
             # Append DataFrame to the list
             all_data.append(data)
-
-            i = i + 1
-
-            # for testing just use 3 months
-            if i > 3:
-                break
 
         # Concatenate all DataFrames row by row
         combined_data = pd.concat(all_data, ignore_index=True)
