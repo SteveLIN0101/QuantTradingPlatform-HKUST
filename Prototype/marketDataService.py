@@ -37,7 +37,7 @@ class MarketDataService:
 
         self.get_market_data_with_delay(
             stock_id="0050",
-            start_on_date="202404"
+            start_on_date="202406"
         )
 
     # Function to generate market data from .csv.gz files
@@ -58,12 +58,15 @@ class MarketDataService:
 
         # if start_on_date is provided, filter the files
         if start_on_date:
+            date_filter_files = []
             for file in files:
                 # get the date from the file name : e.g. 6443_md_202404_202404.csv.gz (FILTER BEFORE BETWEEN _ and .csv.gz)
                 date = int(file.split('_')[2])
-                files = [file for file in files if date >= int(start_on_date)]
-                
+                if date >= int(start_on_date):
+                    date_filter_files.append(file)
 
+            files = date_filter_files
+                
         # sort the files
         files.sort()
         print("SORTED ORDER OF FILES: ", files)
