@@ -136,6 +136,13 @@ class MarketDataService:
             self.marketData_2_exchSim_q.put(quoteSnapshot)
             self.marketData_2_platform_q.put(quoteSnapshot)
 
+            # save to logs called market_data_output.txt
+            with open('market_data_output.txt', 'a') as f:
+                # Increase the display width to show more columns
+                pd.set_option('display.max_columns', 100)
+                f.write(quoteSnapshot.outputAsDataFrame().to_string(index=False) + '\n')
+
+            # no delay for the first row
             if first_val:
                 first_val = False
                 continue 
