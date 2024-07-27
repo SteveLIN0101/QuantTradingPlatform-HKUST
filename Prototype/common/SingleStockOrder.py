@@ -4,11 +4,13 @@ Created on Fri Jul  5 23:47:43 2019
 
 @author: hongsong chou
 """
+import time
 
 class SingleStockOrder():
     
     def __init__(self, ticker, date, submissionTime):
-        self.orderID = 0
+        # generate order id as a unique identifier with unix timestamp
+        self.orderID = int(time.time())
         self.ticker = ticker
         self.date = date
         self.submissionTime = submissionTime
