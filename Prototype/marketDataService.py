@@ -37,27 +37,6 @@ class MarketDataService:
 
         self.get_market_data_with_delay()
 
-    def produce_market_data(self, marketData_2_exchSim_q, marketData_2_platform_q):
-        for i in range(10):
-            self.produce_quote(marketData_2_exchSim_q, marketData_2_platform_q)
-            time.sleep(5)
-
-    def produce_quote(self, marketData_2_exchSim_q, marketData_2_platform_q):
-        bidPrice, askPrice, bidSize, askSize = [], [], [], []
-        bidPrice1 = 20+random.randint(0,100)/100
-        askPrice1 = bidPrice1 + 0.01
-        for i in range(5):
-            bidPrice.append(bidPrice1-i*0.01)
-            askPrice.append(askPrice1+i*0.01)
-            bidSize.append(100+random.randint(0,100)*100)
-            askSize.append(100+random.randint(0,100)*100)
-        quoteSnapshot = OrderBookSnapshot_FiveLevels('testTicker', '20230706', time.asctime(time.localtime(time.time())), 
-                                                     bidPrice, askPrice, bidSize, askSize)
-        print('[%d]MarketDataService>>>produce_quote' % (os.getpid()))
-        print(quoteSnapshot.outputAsDataFrame())
-        marketData_2_exchSim_q.put(quoteSnapshot)
-        marketData_2_platform_q.put(quoteSnapshot)
-
     # Function to generate market data from .csv.gz files
     def market_data_generator(self,on_date='202404',stock_id="0050",from_date=None):
         dataFolder = 'processedData_2024/stocks'
@@ -153,8 +132,6 @@ class MarketDataService:
 
             print('[%d]MarketDataService>>>produce_quote' % (os.getpid()))
 
-            print(quoteSnapshot.outputAsDataFrame())
-
             # Put the data in the queue
             self.marketData_2_exchSim_q.put(quoteSnapshot)
             self.marketData_2_platform_q.put(quoteSnapshot)
@@ -164,6 +141,28 @@ class MarketDataService:
                 continue 
                 
             time.sleep(row['time_diff'].total_seconds())  # Wait for the specified delay
+
+
+    # def produce_market_data(self, marketData_2_exchSim_q, marketData_2_platform_q):
+    #     for i in range(10):
+    #         self.produce_quote(marketData_2_exchSim_q, marketData_2_platform_q)
+    #         time.sleep(5)
+
+    # def produce_quote(self, marketData_2_exchSim_q, marketData_2_platform_q):
+    #     bidPrice, askPrice, bidSize, askSize = [], [], [], []
+    #     bidPrice1 = 20+random.randint(0,100)/100
+    #     askPrice1 = bidPrice1 + 0.01
+    #     for i in range(5):
+    #         bidPrice.append(bidPrice1-i*0.01)
+    #         askPrice.append(askPrice1+i*0.01)
+    #         bidSize.append(100+random.randint(0,100)*100)
+    #         askSize.append(100+random.randint(0,100)*100)
+    #     quoteSnapshot = OrderBookSnapshot_FiveLevels('testTicker', '20230706', time.asctime(time.localtime(time.time())), 
+    #                                                  bidPrice, askPrice, bidSize, askSize)
+    #     print('[%d]MarketDataService>>>produce_quote' % (os.getpid()))
+    #     print(quoteSnapshot.outputAsDataFrame())
+    #     marketData_2_exchSim_q.put(quoteSnapshot)
+    #     marketData_2_platform_q.put(quoteSnapshot)
 
 
 # To run directly for testing
