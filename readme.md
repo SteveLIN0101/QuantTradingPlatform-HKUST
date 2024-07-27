@@ -2,6 +2,10 @@
 
 # FRONTEND DEMO
 
+
+https://github.com/user-attachments/assets/d629bab6-6e52-467b-b6c3-cc841478caeb
+
+
 To run frontend:
 
 ```
