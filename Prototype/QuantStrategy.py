@@ -33,7 +33,20 @@ class QuantStrategy(Strategy):
             return None
         elif ((marketData is not None) and (isinstance(marketData, OrderBookSnapshot_FiveLevels))) and (execution is None):
             #handle new market data, then create a new order and send it via quantTradingPlatform.
-            return SingleStockOrder('testTicker','2019-07-05',time.asctime(time.localtime(time.time())))
+            # return SingleStockOrder('testTicker','2019-07-05',time.asctime(time.localtime(time.time())))
+
+            # change as wished
+            trade_date = '2024-04-01'
+            trade_time = '09:00:14.670'
+            test_order = SingleStockOrder("0050", trade_date, trade_time)
+            test_order.type = "MO"
+            test_order.size = 5
+            test_order.currStatus = "New"
+            self.currStatusTime = time.asctime(time.localtime(time.time()))
+            test_order.direction = "Buy"
+
+            return test_order
+
         else:
             return None
                 
