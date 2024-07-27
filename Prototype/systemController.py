@@ -9,11 +9,18 @@ from multiprocessing import Process, Queue
 from marketDataService import MarketDataService
 from exchangeSimulator import ExchangeSimulator
 from quantTradingPlatform import TradingPlatform
+import os
 
 if __name__ == '__main__':
+    # delete existing .txt log files 
+    for f in os.listdir():
+        if f.endswith('.txt'):
+            os.remove(f)
+
     ###########################################################################
     # Define all components
     ###########################################################################
+    
     marketData_2_exchSim_q = Queue()
     marketData_2_platform_q = Queue()
     
