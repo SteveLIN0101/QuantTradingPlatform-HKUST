@@ -147,7 +147,7 @@ class MarketDataService:
             askPrice = [row['SP1'], row['SP2'], row['SP3'], row['SP4'], row['SP5']]
             bidSize = [row['BV5'], row['BV4'], row['BV3'], row['BV2'], row['BV1']]
             askSize = [row['SV1'], row['SV2'], row['SV3'], row['SV4'], row['SV5']]
-            quoteSnapshot = OrderBookSnapshot_FiveLevels(stock_id, on_date, row['datetime'], 
+            quoteSnapshot = OrderBookSnapshot_FiveLevels(stock_id, row['date'], row['datetime'], 
                                                      bidPrice, askPrice, bidSize, askSize)
 
 
