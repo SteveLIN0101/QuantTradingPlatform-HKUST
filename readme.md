@@ -1,6 +1,13 @@
 # 4 (+1 frontend) main components connected and logging into .txt files . Logs are refreshed on run
 
-# DEMO
+# FRONTEND DEMO
+
+To run frontend:
+
+```
+pip3 install dash
+python3 Prototype/frontend.py
+```
 
 # Market Data Service - Group 1
 
