@@ -35,20 +35,38 @@ class MarketDataService:
         self.marketData_2_exchSim_q = marketData_2_exchSim_q
         self.marketData_2_platform_q = marketData_2_platform_q
 
-        self.get_market_data_with_delay()
+        self.get_market_data_with_delay(
+            stock_id="0050",
+            start_on_date="202404"
+        )
 
     # Function to generate market data from .csv.gz files
-    def market_data_generator(self,on_date='202404',stock_id="0050",from_date=None):
+    def market_data_generator(self,stock_id=None,start_on_date=None):
         dataFolder = 'processedData_2024/stocks'
 
         # Get all .csv.gz files in the data folder according to filters defined
         files = []
-        if from_date is not None:
-            files = [f for f in os.listdir(dataFolder) if f.endswith('.csv.gz') and f.startswith(stock_id) and int(f.split("_")[2]) >= int(from_date)]
-        else:
-            files = [f for f in os.listdir(dataFolder) if f.endswith('.csv.gz') and f.startswith(stock_id) and int(f.split("_")[2]) == int(on_date)]
+
+        # first get all files
+        for file in os.listdir(dataFolder):
+            if file.endswith('.csv.gz'):
+                files.append(file)
+
+        # if stock_id is provided, filter the files
+        if stock_id:
+            files = [file for file in files if stock_id in file]
+
+        # if start_on_date is provided, filter the files
+        if start_on_date:
+            for file in files:
+                # get the date from the file name : e.g. 6443_md_202404_202404.csv.gz (FILTER BEFORE BETWEEN _ and .csv.gz)
+                date = int(file.split('_')[2])
+                files = [file for file in files if date >= int(start_on_date)]
+                
 
         # sort the files
+        files.sort()
+        print("SORTED ORDER OF FILES: ", files)
 
         # List to hold all DataFrames
         all_data = []
@@ -86,8 +104,11 @@ class MarketDataService:
         return combined_data
 
     # Function to get and print the data row by row with a delay
-    def get_market_data_with_delay(self,on_date='202404',stock_id="0050",from_date=None):
-        combined_data = self.market_data_generator()
+    def get_market_data_with_delay(self,stock_id=None,start_on_date=None):
+        combined_data = self.market_data_generator(
+            stock_id=stock_id,
+            start_on_date=start_on_date
+        )
         first_val = True
         for index, row in combined_data.iterrows():
 
@@ -180,4 +201,5 @@ if __name__ == '__main__':
 
 
     marketDataService = MarketDataService(sample_marketData_2_exchSim_q, sample_marketData_2_platform_q)
-    marketDataService.get_market_data_with_delay()
+    marketDataService.get_market_data_with_delay(
+    )
