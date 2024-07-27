@@ -57,7 +57,7 @@ class OrderBookSnapshot_FiveLevels(OrderBookSnapshot):
         elif self.askSize5 > 0:
             return self.askPrice5, self.askSize5,5
         else:
-            return None, None, None
+            return 0, 0, 0
 
     # return the best bid price,size,index
     def get_best_bid(self):
@@ -73,7 +73,7 @@ class OrderBookSnapshot_FiveLevels(OrderBookSnapshot):
         elif self.bidSize5 > 0:
             return self.bidPrice5, self.bidSize5,5
         else:
-            return None, None, None
+            return 0, 0, 0
 
     # easy methods to update bids,asks from exchange
     def update_bid_by_index(self,index,size):
