@@ -43,6 +43,82 @@ class OrderBookSnapshot_FiveLevels(OrderBookSnapshot):
             self.initializationFlag = True
             return
 
+    # return the best ask price,size,index
+    def get_best_ask(self):
+        # if statements to get first ask price that is not None
+        if self.askSize1 > 0:
+            return self.askPrice1, self.askSize1,1
+        elif self.askSize2 > 0:
+            return self.askPrice2, self.askSize2,2
+        elif self.askSize3 > 0:
+            return self.askPrice3, self.askSize3,3
+        elif self.askSize4 > 0:
+            return self.askPrice4, self.askSize4,4
+        elif self.askSize5 > 0:
+            return self.askPrice5, self.askSize5,5
+        else:
+            return None, None, None
+
+    # return the best bid price,size,index
+    def get_best_bid(self):
+        # if statements to get first bid price that is not None
+        if self.bidSize1 > 0:
+            return self.bidPrice1, self.bidSize1,1
+        elif self.bidSize2 > 0:
+            return self.bidPrice2, self.bidSize2,2
+        elif self.bidSize3 > 0:
+            return self.bidPrice3, self.bidSize3,3
+        elif self.bidSize4 > 0:
+            return self.bidPrice4, self.bidSize4,4
+        elif self.bidSize5 > 0:
+            return self.bidPrice5, self.bidSize5,5
+        else:
+            return None, None, None
+
+    # easy methods to update bids,asks from exchange
+    def update_bid_by_index(self,index,size):
+        if index == 1:
+            # remove size from bidSize1
+            self.bidSize1 = self.bidSize1 - size
+
+        if index == 2:
+            # remove size from bidSize2
+            self.bidSize2 = self.bidSize2 - size
+
+        if index == 3:
+            # remove size from bidSize3
+            self.bidSize3 = self.bidSize3 - size
+        
+        if index == 4:
+            # remove size from bidSize4
+            self.bidSize4 = self.bidSize4 - size
+
+        if index == 5:
+            # remove size from bidSize5
+            self.bidSize5 = self.bidSize5 - size
+
+    def update_ask_by_index(self,index,size):
+        if index == 1:
+            # remove size from askSize1
+            self.askSize1 = self.askSize1 - size
+
+        if index == 2:
+            # remove size from askSize2
+            self.askSize2 = self.askSize2 - size
+
+        if index == 3:
+            # remove size from askSize3
+            self.askSize3 = self.askSize3 - size
+        
+        if index == 4:
+            # remove size from askSize4
+            self.askSize4 = self.askSize4 - size
+
+        if index == 5:
+            # remove size from askSize5
+            self.askSize5 = self.askSize5 - size
+
+ 
     def outputAsDataFrame(self):
         if self.initializationFlag == False:
             return None
