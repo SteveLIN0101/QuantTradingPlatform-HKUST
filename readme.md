@@ -2,8 +2,6 @@
 
 # DEMO
 
-[Watch the video](demo_v0.mp4)
-
 # Market Data Service - Group 1
 
 - DONE PART -> This section is working for SINGLE STOCK PUBLISHING , current code can take in files with 2 specified options
