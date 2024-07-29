@@ -10,7 +10,39 @@ import os
 import time
 from common.SingleStockExecution import SingleStockExecution
 
+
 class ExchangeSimulator:
+    # To store the current quoteSnapshot
+    quoteSnapshot = None
+    scriptionList = [....]
+
+    # To store bid/ask orders
+    bidOrders = dict()
+    askOrders = dict()
+
+    # To store available order price levels
+    bidOrderLevels = []
+    askOrderLevels = []
+
+    # To store marketdata orderbook
+    bidQuotaSnapshot = {}
+    askQuotaSnapshot = {}
+    for code in scriptionList:
+        bidQuotaSnapshot[code] = None
+        askQuotaSnapshot[code] = None
+
+    MO_remain_BUY = {} #key:code, value: [orderid + restvolume]
+    LO_remain_BUY = {} #key:code, value: [orderid + restvolume, price]
+
+    MO_remain_SELL = {} #key:code, value: [orderid + restvolume]
+    LO_remain_SELL = {} #key:code, value: [orderid + restvolume, price]
+
+    # To generate executionIDs, start from 1
+    execID = 1
+
+    m_QuotaSnapshot = threading.Lock();
+    #m_MO_remain = threading.Lock();
+    #m_LO_remain = threading.Lock();
     
     def __init__(self, marketData_2_exchSim_q, platform_2_exchSim_order_q, exchSim_2_platform_execution_q):
         print("[%d]<<<<< call ExchSim.init" % (os.getpid(),))
@@ -21,131 +53,108 @@ class ExchangeSimulator:
         t_order = threading.Thread(name='exchsim.on_order', target=self.consume_order, args=(platform_2_exchSim_order_q, exchSim_2_platform_execution_q, ))
         t_order.start()
 
-        # a data structure of exchange order book mapping key to object
-        # e.g. {"test_stock " : OrderBookSnapshot_FiveLevels.outputAsDataFrame() }
-        self.exchange_order_book = {
-
-        }
-
-        # store order IDs
-        self.exchange_submitted_orders = {
-
-        }
-
-    def update_order_book(self, order_book_snapshot):
-        # get ticker id
-        ticker = order_book_snapshot.ticker
-
-        # update latest ticker dict info.
-        self.exchange_order_book[ticker] = order_book_snapshot
-
     def consume_md(self, marketData_2_exchSim_q):
         while True:
             res = marketData_2_exchSim_q.get()
-            print('[%d]ExchSim.consume_md' % (os.getpid()))
-            print(res.outputAsDataFrame())
+            #print('[%d]ExchSim.consume_md' % (os.getpid()))
+            #print(res.outputAsDataFrame())
+            m_QuotaSnapshot.acquire()
+            bidQuotaSnapshot[res.ticker] = [(res.bidPrice1, res.bidSize1),...]
+            askQuotaSnapshot[res.ticker] = .....
 
-            # update Exchange Simulator's order book
-            self.update_order_book(res)
+            #currentlevel = 1
+
+            while len(MO_remain_BUY[res.ticker])>0 and #sum(ask_quota_all_level_size) > 0:
+                res = MO_remain_BUY[res.ticker].pop(0)
+                #use code below
+                #if fullyexection:
+                    #    index add to MO_Buy_poplist
+            #MO_Buy_poplistpoplist.sort(reverse= highest to lowest),
+                        #if partilyexection:
+                        #    MO_Buy_list[index].size -= []
+            #LO_Buy_poplist = []
+            while #sum(ask_quota_all_level_size) > 0:
+                for remain_order in LO_remain_BUY:
+                    if remain_order.price < #ask_quota[currentlevel-1].price[0]:
+                        # use copy below
+                        #if fullyexection:
+                        #    index add to poplist
+            #poplist.sort(reverse= highest to lowest),
+                        #if partilyexection:
+                        #    list[index].size -= []
+
+            #Sell
+            
+            m_QuotaSnapshot.release()
+
+
+        #### exectionRestOrder
+
+
     
     def consume_order(self, platform_2_exchSim_order_q, exchSim_2_platform_execution_q):
         while True:
             res = platform_2_exchSim_order_q.get()
-            print('[%d]ExchSim.on_order' % (os.getpid()))
-            print(res.outputAsArray())
-            self.produce_execution(res, exchSim_2_platform_execution_q)
-    
-    def produce_execution(self, order, exchSim_2_platform_execution_q):
-        execution = SingleStockExecution(order.ticker, order.date, time.asctime(time.localtime(time.time())))
-
-        # set execution to have the original order's ID
-        execution.orderID = order.orderID
-        # set execution to an easily identifiable ID
-        execution.execID = "execution_" + str(order.orderID)
-
-        # get latest order book snapshot
-        order_book_snapshot = self.exchange_order_book[order.ticker]
-    
-        best_ask_price,best_ask_size,best_ask_index = order_book_snapshot.get_best_ask()
-        best_bid_price,best_bid_size,best_bid_index = order_book_snapshot.get_best_bid()
-
-        print("Best ask price: ", best_ask_price)
-        print("Best bid price: ", best_bid_price)
-
-        if order.direction == "Buy":
-            execution.direction = order.direction
-    
-            if order.type == "MO":
-                # get order size
-                order_size_to_fill = order.size
-
-                # use to store average fill price if order is partially filled
-                total_fill_price = 0
-                total_fill_size = 0
-
-                # keep looping and getting best ask price until ORDER IS FILLED OR THERE IS NO MORE ASK OFFERS
-                while order_size_to_fill > 0 and best_ask_size > 0:
-                    # get order size
-                    order_size = min(order_size_to_fill, best_ask_size)
-                    order_price = best_ask_price
-
-                    # update order size to fill variable
-                    order_size_to_fill -= order_size
-
-
-                    # update object
-                    order_book_snapshot.update_ask_by_index(best_ask_index, order_size)
-
-
-                    # update average fill price
-                    total_fill_price += order_price*order_size
-                    total_fill_size += order_size
-
-                    # produce execution object
-
-                    # get next best ask price
-                    best_ask_price,best_ask_size,best_ask_index = order_book_snapshot.get_best_ask()
-
-                # calculate average fill price, if no fill, set to None to avoid division by zero
-                average_fill_price = total_fill_price/total_fill_size if total_fill_size > 0 else None
-                
-                # if order is partially filled with size remaining
-                if order_size_to_fill > 0:
-                    # order is partially filled
-                    order.currStatus = "PartiallyFilled"
-
-                elif order_size_to_fill == 0:
-                    # order is completely filled
-                    order.currStatus = "Filled"
-                    
-                elif order_size_to_fill == order.size:
-                    # order is cancelled
-                    order.currStatus = "Cancelled"
-
-
-                # update execution and order objects with info
-                execution.price = average_fill_price
-                execution.size = total_fill_size
-                execution.timeStamp = time.asctime(time.localtime(time.time()))
-                execution.direction = order.direction
-
-                order.price = average_fill_price
-                order.size = total_fill_size
-                order.currStatusTime = execution.timeStamp
-
-
-            # HANDLE FOR OTHERS 
-            if order.type == "LAZINESS":
-                # get order size
-                order_size = order.size
-                order_price = best_ask_price
-
+            #print('[%d]ExchSim.on_order' % (os.getpid()))
+            #print(res.outputAsArray())
+            m_QuotaSnapshot.acquire()
+            if res.currStatus == 'NEW':
+                if res.type == 'MO':
+                    if res.direction == 'BUY':
+                        level = 1
+                        while res.size > 0 and level <= 5:
+                            if res.size > askQuotaSnapshot[res.ticker][level-1][1]:
+                                askQuotaSnapshot[res.ticker][level-1] = 0
+                                res.size -= askQuotaSnapshot[res.ticker][level-1][1]
+                                self.produce_execution(......) # size = askQuotaSnapshot[res.ticker][level-1][1]
+                                level += 1
+                            else:
+                                askQuotaSnapshot[res.ticker][level-1][1] -= res.size
+                                res.size = 0
+                                self.produce_execution(......) # size = res.size
+                        if res.size > 0:
+                            if res.ticker in MO_remain:
+                                MO_remain[res.ticker].append(order..., res.size)
+                            else:
+                                MO_remain[res.ticker] = [(order..., res.size)]
+                    elif res.direction == 'SELL':
+                        ....  
+                elif res.type == 'LO':
+                    if res.direction == 'BUY':
+                        level = 1
+                        while res.size > 0 and level <= 5 and askQuotaSnapshot[res.ticker][level-1][0] <= res.price:
+                            if res.size > askQuotaSnapshot[res.ticker][level-1][1]:
+                                askQuotaSnapshot[res.ticker][level-1] = 0
+                                res.size -= askQuotaSnapshot[res.ticker][level-1][1]
+                                self.produce_execution(......) # size = askQuotaSnapshot[res.ticker][level-1][1], price = askQuotaSnapshot[res.ticker][level-1][0]
+                                level += 1
+                            else:
+                                askQuotaSnapshot[res.ticker][level-1][1] -= res.size
+                                res.size = 0
+                                self.produce_execution(......) # size = res.size, price = askQuotaSnapshot[res.ticker][level-1][0]
+                        if res.size > 0:
+                            if res.ticker in LO_remain:
+                                LO_remain[res.ticker].append(order..., res.size, price)
+                            else:
+                                LO_remain[res.ticker] = [(order..., res.size, price)]
+                else:
+                    pass
+            #elif res.currStatus == 'Cancel':
+            #    pass
+            else:
                 pass
+            m_QuotaSnapshot.release()
+            
+    
+    def produce_execution(self, (order.size....), exchSim_2_platform_execution_q):
 
-        # return both execution and order object to platform
-        exchSim_2_platform_execution_q.put([execution,order])
+        execution = SingleStockExecution(time.asctime(time.localtime(time.time())),
+                                         ...,
+                                         self.execID,
+                                         self.quoteSnapshot)
 
-        print('[%d]ExchSim.produce_execution' % (os.getpid()))
-        print(execution.outputAsArray())
-
-
+        # Only Traded Successfully the execution will be delivered
+            self.execID += 1
+            exchSim_2_platform_execution_q.put(execution)
+            print('[%d]ExchSim.produce_execution' % (os.getpid()))
+            print(execution.outputAsArray())
